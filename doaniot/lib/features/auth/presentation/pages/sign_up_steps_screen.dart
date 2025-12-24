@@ -74,7 +74,10 @@ class _SignUpStepsScreenState extends State<SignUpStepsScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: const Icon(
+            Icons.arrow_back_rounded,
+            color: AppColors.textPrimary,
+          ),
           onPressed: _prevStep,
         ),
         backgroundColor: Colors.white,

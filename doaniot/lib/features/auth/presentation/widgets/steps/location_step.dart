@@ -1,9 +1,9 @@
-import 'dart:async'; // Cần thêm để dùng StreamSubscription
-import 'dart:ui';
+import 'dart:async';
+import 'dart:ui'; // Cần cho ImageFilter
 import 'package:flutter/material.dart';
 import 'package:doaniot/core/theme/app_colors.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:latlong2/latlong.dart' hide Path;
 
 class LocationStep extends StatefulWidget {
   final VoidCallback onNext;
@@ -28,12 +28,10 @@ class _LocationStepState extends State<LocationStep> {
   @override
   void initState() {
     super.initState();
-    // Lắng nghe sự kiện từ bản đồ để xử lý khi người dùng DỪNG kéo
     _mapEventSubscription = _mapController.mapEventStream.listen((event) {
       if (event is MapEventMoveStart) {
         setState(() {
           _isMoving = true;
-          // Khi bắt đầu kéo, hiển thị trạng thái đang tìm
           if (_isLocationEnabled) {
             _addressController.text = "Locating...";
           }
@@ -43,7 +41,6 @@ class _LocationStepState extends State<LocationStep> {
           _isMoving = false;
           _currentCenter = event.camera.center;
         });
-        // Khi dừng kéo, cập nhật địa chỉ
         if (_isLocationEnabled) {
           _updateAddressFromCoordinates(_currentCenter);
         }
@@ -60,7 +57,6 @@ class _LocationStepState extends State<LocationStep> {
   }
 
   void _enableLocation() async {
-    // Giả lập loading tìm vị trí hiện tại
     setState(() {
       _addressController.text = "Locating...";
     });
@@ -69,20 +65,15 @@ class _LocationStepState extends State<LocationStep> {
 
     setState(() {
       _isLocationEnabled = true;
-      // Di chuyển map đến vị trí mặc định (hoặc vị trí thực tế nếu có GPS)
       _mapController.move(_currentCenter, 15);
       _updateAddressFromCoordinates(_currentCenter);
     });
   }
 
-  // Hàm giả lập Reverse Geocoding (Tọa độ -> Địa chỉ)
   void _updateAddressFromCoordinates(LatLng point) {
-    // Trong thực tế, bạn sẽ gọi API Google Maps hoặc Geocoding tại đây
-    // Ví dụ giả lập:
     final lat = point.latitude.toStringAsFixed(4);
     final lng = point.longitude.toStringAsFixed(4);
 
-    // Giả lập độ trễ mạng nhẹ cho cảm giác thật
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
         setState(() {
@@ -96,11 +87,10 @@ class _LocationStepState extends State<LocationStep> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Content Layer (Map + Inputs)
+        // Content Layer
         Column(
           children: [
             const SizedBox(height: 24),
-            // ... (Phần Header giữ nguyên)
             RichText(
               textAlign: TextAlign.center,
               text: TextSpan(
@@ -141,7 +131,6 @@ class _LocationStepState extends State<LocationStep> {
                         options: MapOptions(
                           initialCenter: _currentCenter,
                           initialZoom: 15.0,
-                          // Chỉ cho phép tương tác khi đã Enable Location
                           interactionOptions: InteractionOptions(
                             flags: _isLocationEnabled
                                 ? InteractiveFlag.all
@@ -150,7 +139,6 @@ class _LocationStepState extends State<LocationStep> {
                         ),
                         children: [
                           TileLayer(
-                            // 1. SỬ DỤNG MAP CARTO LIGHT ĐỂ GIỐNG HÌNH (TRẮNG/XÁM)
                             urlTemplate:
                                 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
                             subdomains: const ['a', 'b', 'c'],
@@ -159,13 +147,14 @@ class _LocationStepState extends State<LocationStep> {
                         ],
                       ),
 
-                      // 2. CENTER PIN (GHIM VỊ TRÍ) GIỐNG HÌNH
+                      // Center Pin (Ghim vị trí)
                       if (_isLocationEnabled)
-                        Center(
+                        const Center(
+                          // Padding bottom để mũi nhọn của ghim chạm đúng tâm map
+                          // Marker cao khoảng 76px (60 body + 16 tail), nên đẩy lên 1 nửa + tail
                           child: Padding(
-                            // Đẩy icon lên trên một chút để đầu nhọn trúng tâm màn hình
-                            padding: const EdgeInsets.only(bottom: 35),
-                            child: _buildCustomMarker(),
+                            padding: EdgeInsets.only(bottom: 76 / 2),
+                            child: CustomLocationMarker(),
                           ),
                         ),
                     ],
@@ -186,26 +175,12 @@ class _LocationStepState extends State<LocationStep> {
                     style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                   ),
                   const SizedBox(height: 12),
+                  // ĐÃ SỬA: Bỏ icon ở đây
                   TextField(
                     controller: _addressController,
                     readOnly: true,
-                    // Hiển thị icon loading ở prefix nếu đang kéo map
                     decoration: InputDecoration(
-                      prefixIcon: _isMoving
-                          ? const Padding(
-                              padding: EdgeInsets.all(12),
-                              child: SizedBox(
-                                width: 10,
-                                height: 10,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              ),
-                            )
-                          : const Icon(
-                              Icons.location_on_outlined,
-                              color: AppColors.primary,
-                            ),
+                      // prefixIcon: null, // Đã xóa theo yêu cầu
                       hintText: 'Address will appear here...',
                       filled: true,
                       fillColor: Colors.grey[50],
@@ -223,7 +198,7 @@ class _LocationStepState extends State<LocationStep> {
               ),
             ),
 
-            // Bottom Actions (Giữ nguyên)
+            // Bottom Actions
             Container(
               padding: const EdgeInsets.all(24),
               child: Row(
@@ -249,7 +224,6 @@ class _LocationStepState extends State<LocationStep> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: ElevatedButton(
-                      // Nút Continue chỉ enable khi đã có Location và không đang di chuyển
                       onPressed: (_isLocationEnabled && !_isMoving)
                           ? widget.onNext
                           : null,
@@ -274,7 +248,7 @@ class _LocationStepState extends State<LocationStep> {
           ],
         ),
 
-        // Blur & Dialog Overlay (Giữ nguyên logic cũ)
+        // Blur & Dialog Overlay (Giữ nguyên)
         if (!_isLocationEnabled)
           Positioned.fill(
             child: Stack(
@@ -373,34 +347,70 @@ class _LocationStepState extends State<LocationStep> {
       ],
     );
   }
+}
 
-  // Widget tạo Marker tùy chỉnh giống hình mẫu
-  Widget _buildCustomMarker() {
-    return Stack(
-      alignment: Alignment.topCenter,
+// --- WIDGET MARKER MỚI GIỐNG HÌNH MẪU ---
+class CustomLocationMarker extends StatelessWidget {
+  const CustomLocationMarker({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        // Bóng đổ bên dưới chân ghim
+        // 1. Phần đầu tròn
         Container(
-          margin: const EdgeInsets.only(top: 40),
-          width: 20,
-          height: 10,
+          width: 45,
+          height: 45,
+          padding: const EdgeInsets.all(8), // Viền xanh bên ngoài
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.2),
-            borderRadius: const BorderRadius.all(Radius.elliptical(20, 10)),
+            color: AppColors.primary, // Màu nền xanh
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withOpacity(0.3),
+                blurRadius: 15,
+                offset: const Offset(0, 5),
+              ),
+            ],
+            // Thêm viền trắng mỏng nếu muốn giống hệt hình (option)
+            border: Border.all(color: Colors.white, width: 2),
+          ),
+          child: Container(
+            // Vòng tròn nhạt hơn bên trong
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: Image.asset('assets/user.png', width: 30),
           ),
         ),
-        // Thân ghim (Màu xanh)
-        const Icon(
-          Icons.location_on_rounded,
-          size: 60,
-          color: AppColors.primary,
-        ),
-        // Icon người dùng bên trong (Màu trắng)
-        const Positioned(
-          top: 10, // Căn chỉnh vị trí để nằm lọt vào vòng tròn của ghim
-          child: Icon(Icons.person, size: 24, color: Colors.white),
+
+        // 2. Phần đuôi nhọn (Tam giác)
+        Transform.translate(
+          offset: const Offset(0, -5), // Đẩy lên để dính vào hình tròn
+          child: ClipPath(
+            clipper: _TriangleClipper(),
+            child: Container(width: 20, height: 16, color: AppColors.primary),
+          ),
         ),
       ],
     );
   }
+}
+
+// Clipper để vẽ hình tam giác cho đuôi marker
+class _TriangleClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    path.moveTo(0, 0); // Góc trái trên
+    path.lineTo(size.width, 0); // Góc phải trên
+    path.lineTo(size.width / 2, size.height); // Mũi nhọn ở giữa dưới
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }

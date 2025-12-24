@@ -144,7 +144,7 @@ class _AddRoomsStepState extends State<AddRoomsStep> {
                 child: ElevatedButton(
                   onPressed: widget.onSkip,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFF3F5F7),
+                    backgroundColor: AppColors.secondary,
                     foregroundColor: AppColors.primary,
                     minimumSize: const Size(double.infinity, 52),
                     shape: RoundedRectangleBorder(
