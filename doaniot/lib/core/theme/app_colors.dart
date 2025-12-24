@@ -8,4 +8,5 @@ class AppColors {
   static const Color textSecondary = Color(0xFF757575);
   static const Color lightGrey = Color(0xFFF5F5F5);
   static const Color socialButtonBorder = Color(0xFFE0E0E0);
+  static const Color inputBorder = Color(0xFFE0E0E0);
 }

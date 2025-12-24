@@ -3,6 +3,7 @@ import 'package:doaniot/core/theme/app_colors.dart';
 import 'package:doaniot/core/constants/app_constants.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:doaniot/features/auth/presentation/pages/sign_up_screen.dart';
+import 'package:doaniot/features/auth/presentation/pages/sign_in_screen.dart';
 
 class GetStartedScreen extends StatelessWidget {
   const GetStartedScreen({super.key});
@@ -80,9 +81,14 @@ class GetStartedScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () {},
-                child: const Text('Sign in'),
-
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SignInScreen(),
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.secondary,
                   foregroundColor: AppColors.primary,
@@ -91,6 +97,7 @@ class GetStartedScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(32),
                   ),
                 ),
+                child: const Text('Sign in'),
               ),
               const SizedBox(height: 24),
 

@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:doaniot/core/theme/app_colors.dart';
 import 'package:doaniot/core/presentation/widgets/loading_dialog.dart';
 import 'package:doaniot/features/auth/presentation/pages/sign_up_steps_screen.dart';
+import 'package:doaniot/features/auth/presentation/pages/sign_in_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -218,6 +219,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     GestureDetector(
                       onTap: () {
                         // Navigate to Sign In
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SignInScreen(),
+                          ),
+                        );
                       },
                       child: const Text(
                         'Sign in',
@@ -269,6 +276,35 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     'Sign up',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
+                ),
+                const SizedBox(height: 24),
+
+                // Have an account? Sign in
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      "Already have an account? ",
+                      style: TextStyle(color: AppColors.textSecondary),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SignInScreen(),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        'Sign in',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 32),
               ],
