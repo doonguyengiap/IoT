@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:doaniot/core/theme/app_colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:doaniot/features/device/presentation/pages/connect_device_screen.dart';
 
 class AddDeviceScreen extends StatefulWidget {
   const AddDeviceScreen({super.key});
@@ -363,10 +364,16 @@ class _AddDeviceScreenState extends State<AddDeviceScreen>
   }
 
   Widget _buildDeviceItem(DeviceItem device) {
-    return SizedBox(
-      width: 60,
-      height: 60,
-      child: device.img, // Xóa bỏ Column ở đây
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ConnectDeviceScreen(device: device),
+          ),
+        );
+      },
+      child: SizedBox(width: 60, height: 60, child: device.img),
     );
   }
 }

@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:doaniot/core/theme/app_colors.dart';
-import 'package:doaniot/features/device/presentation/pages/add_device_screen.dart'; // To access DeviceItem potentially, or just pass parameters
+import 'package:doaniot/features/device/presentation/pages/add_device_screen.dart';
+import 'package:flutter_svg/flutter_svg.dart'; // To access DeviceItem potentially, or just pass parameters
 
 class ConnectDeviceScreen extends StatefulWidget {
   final DeviceItem device;
@@ -45,85 +46,89 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_rounded,
-            color: AppColors.textPrimary,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'Add Device',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-            fontSize: 20,
-          ),
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.center_focus_weak,
-              color: AppColors.textPrimary,
-            ), // Placeholder for scan icon
-            onPressed: () {},
-          ),
-        ],
-      ),
+      appBar: _connectionStep == 2
+          ? null
+          : AppBar(
+              backgroundColor: Colors.white,
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(
+                  Icons.arrow_back_rounded,
+                  color: AppColors.textPrimary,
+                ),
+                onPressed: () => Navigator.pop(context),
+              ),
+              title: Text(
+                'Add Device',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                  fontSize: 20,
+                ),
+              ),
+              centerTitle: true,
+              actions: [
+                IconButton(
+                  icon: SvgPicture.asset(
+                    "assets/qrscanner.svg",
+                  ), // Placeholder for scan icon
+                  onPressed: () {},
+                ),
+              ],
+            ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(
           children: [
             const SizedBox(height: 20),
             // Custom Toggle (Visual only for this screen as per design)
-            Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: AppColors.lightGrey,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Text(
-                        'Nearby Devices',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
+            if (_connectionStep != 2) ...[
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: AppColors.lightGrey,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          'Nearby Devices',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: const Text(
-                        'Add Manual',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w500,
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: const Text(
+                          'Add Manual',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 40),
+              const SizedBox(height: 40),
+            ],
 
             if (_connectionStep == 2) ...[
+              Spacer(flex: 10),
               Container(
                 width: 80,
                 height: 80,
@@ -151,6 +156,7 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
                   color: AppColors.textSecondary,
                 ),
               ),
+              const Spacer(flex: 1),
             ] else ...[
               const Text(
                 'Connect to device',
@@ -170,9 +176,35 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
                   ),
                 ],
               ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.primary,
+                    ),
+                    padding: const EdgeInsets.all(4),
+                    child: const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 12,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    widget.device.name,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
             ],
 
-            const Spacer(flex: 1),
+            const Spacer(flex: 3),
 
             // Device Image & Progress
             Stack(
@@ -189,28 +221,12 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
                       backgroundColor: AppColors.lightGrey,
                     ),
                   ),
-                SizedBox(
-                  width: 200,
-                  height: 200,
-                  child: widget
-                      .device
-                      .img, // Using the image passed from previous screen
-                ),
-                if (_connectionStep == 2)
-                  // Show just the image, maybe smaller or same size.
-                  // Design shows image is separate in success state?
-                  // Actually design shows only checkmark at top, and image below?
-                  // Let's stick to the flow:
-                  // Success screen also shows the device image centrally.
-                  const SizedBox.shrink(),
+                SizedBox(width: 250, height: 250, child: widget.device.img),
               ],
             ),
-            if (_connectionStep == 2)
-              // Design shows connected image is the device image again?
-              // Let's keep the device image in the center stack for now.
-              const SizedBox.shrink(),
+            if (_connectionStep == 2) const SizedBox.shrink(),
 
-            const Spacer(flex: 1),
+            const Spacer(flex: 3),
 
             if (_connectionStep == 1) ...[
               const Text(
@@ -227,21 +243,24 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
               ),
             ],
 
-            const Spacer(flex: 1),
+            const Spacer(flex: 8),
 
             // Bottom Buttons
             if (_connectionStep == 0)
-              ElevatedButton(
-                onPressed: _startConnection,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 56),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+              SizedBox(
+                width: 200, // Shortened button width
+                child: ElevatedButton(
+                  onPressed: _startConnection,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 56),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
                   ),
+                  child: const Text('Connect', style: TextStyle(fontSize: 16)),
                 ),
-                child: const Text('Connect', style: TextStyle(fontSize: 16)),
               ),
 
             if (_connectionStep == 1)
@@ -256,7 +275,7 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
                         Navigator.popUntil(context, (route) => route.isFirst);
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.lightGrey,
+                        backgroundColor: AppColors.secondary,
                         foregroundColor: AppColors.primary,
                         elevation: 0,
                         minimumSize: const Size(double.infinity, 56),
