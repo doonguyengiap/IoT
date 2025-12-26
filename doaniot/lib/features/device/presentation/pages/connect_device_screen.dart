@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:doaniot/core/theme/app_colors.dart';
 import 'package:doaniot/features/device/presentation/pages/add_device_screen.dart';
-import 'package:flutter_svg/flutter_svg.dart'; // To access DeviceItem potentially, or just pass parameters
 
 class ConnectDeviceScreen extends StatefulWidget {
   final DeviceItem device;
@@ -69,9 +68,10 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
               centerTitle: true,
               actions: [
                 IconButton(
-                  icon: SvgPicture.asset(
-                    "assets/qrscanner.svg",
-                  ), // Placeholder for scan icon
+                  icon: const Icon(
+                    Icons.more_vert,
+                    color: AppColors.textPrimary,
+                  ),
                   onPressed: () {},
                 ),
               ],
@@ -81,51 +81,6 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
         child: Column(
           children: [
             const SizedBox(height: 20),
-            // Custom Toggle (Visual only for this screen as per design)
-            if (_connectionStep != 2) ...[
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: AppColors.lightGrey,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Text(
-                          'Nearby Devices',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: const Text(
-                          'Add Manual',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: AppColors.textSecondary,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 40),
-            ],
 
             if (_connectionStep == 2) ...[
               Spacer(flex: 10),

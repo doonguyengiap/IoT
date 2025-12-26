@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:doaniot/core/theme/app_colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:doaniot/features/device/presentation/pages/connect_device_screen.dart';
+import 'package:doaniot/features/device/presentation/pages/scan_device_screen.dart';
 
 class AddDeviceScreen extends StatefulWidget {
   const AddDeviceScreen({super.key});
@@ -15,6 +16,26 @@ class _AddDeviceScreenState extends State<AddDeviceScreen>
   late AnimationController _controller;
   List<DeviceItem> _foundDevices = [];
   bool _isNearbySelected = true;
+  String _selectedCategory = 'Popular';
+  final List<String> _categories = [
+    'Popular',
+    'Lightning',
+    'Camera',
+    'Electrical',
+  ];
+
+  final List<Map<String, dynamic>> _manualDevices = [
+    {"name": "Smart V1 CCTV", "img": "assets/cam.png", "category": "Camera"},
+    {"name": "Smart Webcam", "img": "assets/wcam.png", "category": "Camera"},
+    {"name": "Smart V2 CCTV", "img": "assets/camx.png", "category": "Camera"},
+    {"name": "Smart Lamp", "img": "assets/den.png", "category": "Lightning"},
+    {"name": "Speaker", "img": "assets/loa.png", "category": "Popular"},
+    {
+      "name": "Wi-Fi Router",
+      "img": "assets/wifi.png",
+      "category": "Electrical",
+    },
+  ];
 
   @override
   void initState() {
@@ -135,7 +156,14 @@ class _AddDeviceScreenState extends State<AddDeviceScreen>
               "assets/qrscanner.svg",
               color: AppColors.textPrimary,
             ),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ScanDeviceScreen(),
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -211,115 +239,231 @@ class _AddDeviceScreenState extends State<AddDeviceScreen>
               ],
             ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
 
-          Text(
-            'Looking for nearby devices...',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-              fontSize: 18,
-            ),
+          // Content
+          Expanded(
+            child: _isNearbySelected ? _buildNearbyView() : _buildManualView(),
           ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNearbyView() {
+    return Column(
+      children: [
+        Text(
+          'Looking for nearby devices...',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+            fontSize: 18,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildInstructionChip(
+              Icons.wifi,
+              "Turn on your Wifi & Bluetooth to connect",
+            ),
+          ],
+        ),
+        Expanded(
+          child: Stack(
+            alignment: Alignment.center,
             children: [
-              _buildInstructionChip(
-                Icons.wifi,
-                "Turn on your Wifi & Bluetooth to connect",
+              CustomPaint(
+                painter: RipplePainter(_controller),
+                size: const Size(250, 250),
+              ),
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white),
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1))],
+                ),
+                child: ClipOval(
+                  child: Image.asset("assets/mandevice.png", fit: BoxFit.cover),
+                ),
+              ),
+              SizedBox(
+                width: 320,
+                height: 320,
+                child: Stack(
+                  children: _foundDevices
+                      .map(
+                        (device) => Align(
+                          alignment: device.alignment,
+                          child: _buildDeviceItem(device),
+                        ),
+                      )
+                      .toList(),
+                ),
               ),
             ],
           ),
-
-          Expanded(
-            child: Stack(
-              alignment: Alignment.center,
+        ),
+        if (_foundDevices.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
               children: [
-                // Ripples
-                CustomPaint(
-                  painter: RipplePainter(_controller),
-                  size: const Size(250, 250),
-                ),
-
-                // Center User Image
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white),
-                    boxShadow: [
-                      BoxShadow(color: Colors.black.withOpacity(0.1)),
-                    ],
+                ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 56),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    elevation: 0,
                   ),
-                  child: ClipOval(
-                    child: Image.asset(
-                      "assets/mandevice.png",
-                      fit: BoxFit.cover,
-                    ), // Using 1.png as user avatar placeholder if user.png fails/isn't preferred
+                  child: const Text(
+                    'Connect to All Devices',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),
-
-                // Found Devices Container
-                SizedBox(
-                  width: 320,
-                  height: 320,
-                  child: Stack(
-                    children: _foundDevices
-                        .map(
-                          (device) => Align(
-                            alignment: device.alignment,
-                            child: _buildDeviceItem(device),
-                          ),
-                        )
-                        .toList(),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: () {},
+                  child: const Text(
+                    "Can't find your devices? \nLearn more",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: AppColors.textSecondary),
                   ),
                 ),
               ],
             ),
           ),
+        const SizedBox(height: 24),
+      ],
+    );
+  }
 
-          // Connect Button
-          if (_foundDevices.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                children: [
-                  ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(double.infinity, 56),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      elevation: 0,
+  Widget _buildManualView() {
+    // Filter devices based on category
+    // If 'Popular' is selected, we show all (or a curated list), matching the screenshot where all are visible.
+    // Otherwise filter by strict category match.
+    final filteredDevices = _selectedCategory == 'Popular'
+        ? _manualDevices
+        : _manualDevices
+              .where((d) => d['category'] == _selectedCategory)
+              .toList();
+
+    return Column(
+      children: [
+        // Categories
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Row(
+            children: _categories.map((category) {
+              final isSelected = category == _selectedCategory;
+              return Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _selectedCategory = category;
+                    });
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
                     ),
-                    child: const Text(
-                      'Connect to All Devices',
+                    decoration: BoxDecoration(
+                      color: isSelected ? AppColors.primary : Colors.white,
+                      borderRadius: BorderRadius.circular(30),
+                      border: Border.all(
+                        color: isSelected
+                            ? AppColors.primary
+                            : AppColors.inputBorder,
+                      ),
+                    ),
+                    child: Text(
+                      category,
                       style: TextStyle(
-                        fontSize: 16,
+                        color: isSelected
+                            ? Colors.white
+                            : AppColors.textPrimary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  TextButton(
-                    onPressed: () {},
-                    child: const Text(
-                      "Can't find your devices? \nLearn more",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: AppColors.textSecondary),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+        const SizedBox(height: 24),
+
+        // Device Grid
+        Expanded(
+          child: GridView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 24, // Increased spacing for text
+              childAspectRatio: 0.75, // Adjusted for text below image
             ),
-          const SizedBox(height: 24),
-        ],
-      ),
+            itemCount: filteredDevices.length,
+            itemBuilder: (context, index) {
+              final device = filteredDevices[index];
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ConnectDeviceScreen(
+                        device: DeviceItem(
+                          img: Image.asset(device['img']),
+                          name: device['name'],
+                          alignment: Alignment.center,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: AppColors.cardBackground,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        padding: const EdgeInsets.all(4),
+                        child: Image.asset(device['img'], fit: BoxFit.contain),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      device['name'],
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textPrimary,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -341,7 +485,6 @@ class _AddDeviceScreenState extends State<AddDeviceScreen>
             child: Icon(icon, color: Colors.white, size: 12),
           ),
           const SizedBox(width: 8),
-          // Also adding bluetooth icon as per design
           Container(
             padding: const EdgeInsets.all(4),
             decoration: const BoxDecoration(
