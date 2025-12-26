@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:doaniot/core/theme/app_colors.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:doaniot/features/device/presentation/pages/add_device_screen.dart';
+import 'package:doaniot/features/device/presentation/pages/scan_device_screen.dart';
+import 'package:doaniot/features/chat/presentation/pages/chat_ai_screen.dart';
+import 'package:doaniot/features/notification/presentation/pages/notification_screen.dart';
+import 'dart:ui';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,10 +25,20 @@ class _HomeScreenState extends State<HomeScreen> {
     "Kitchen",
   ];
 
+  final List<String> _homes = [
+    "My Home",
+    "My Apartment",
+    "My Office",
+    "My Parents' House",
+    "My Garden",
+  ];
+
+  bool _isMenuOpen = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Stack(
           children: [
@@ -41,27 +55,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        PopupMenuButton<String>(
-                          onSelected: (String result) {
-                            setState(() {
-                              _selectedHome = result;
-                            });
-                          },
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          offset: const Offset(0, 48),
-                          itemBuilder: (BuildContext context) =>
-                              <PopupMenuEntry<String>>[
-                                const PopupMenuItem<String>(
-                                  value: 'My Home',
-                                  child: Text('My Home'),
-                                ),
-                                const PopupMenuItem<String>(
-                                  value: 'Office',
-                                  child: Text('Office'),
-                                ),
-                              ],
+                        GestureDetector(
+                          onTap: () => _showHomeOptions(context),
                           child: Row(
                             children: [
                               // giá trị phụ thuộc vào giá trị được chọn
@@ -85,7 +80,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             // robot
                             InkWell(
-                              onTap: () {},
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const ChatAIScreen(),
+                                  ),
+                                );
+                              },
                               borderRadius: BorderRadius.circular(30),
                               child: CircleAvatar(
                                 radius: 30,
@@ -96,7 +98,15 @@ class _HomeScreenState extends State<HomeScreen> {
                             const SizedBox(width: 12),
                             // notification icon
                             InkWell(
-                              onTap: () {},
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const NotificationScreen(),
+                                  ),
+                                );
+                              },
                               borderRadius: BorderRadius.circular(30),
                               child: CircleAvatar(
                                 radius: 30,
@@ -327,16 +337,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
+
             // Floating Action Buttons
             Positioned(
               bottom: 24,
-              right:
-                  90, // Positioned to the left of the add button (24 + 56 + 10 spacing)
+              right: 90,
               child: FloatingActionButton(
                 heroTag: "mic_fab",
                 onPressed: () {},
                 backgroundColor: AppColors.secondary,
-                shape: CircleBorder(),
+                shape: const CircleBorder(),
                 elevation: 0,
                 child: SvgPicture.asset(
                   "assets/micico.svg",
@@ -344,30 +354,295 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
+
+            // Add Menu Overlay (Now effectively above mic, blurring it)
+            _buildAddMenu(),
+
             Positioned(
               bottom: 24,
               right: 24,
               child: FloatingActionButton(
                 heroTag: "add_fab",
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AddDeviceScreen(),
-                    ),
-                  );
+                  setState(() {
+                    _isMenuOpen = !_isMenuOpen;
+                  });
                 },
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                shape: CircleBorder(), // Ensure circular
+                shape: const CircleBorder(),
                 elevation: 0,
-                child: const Icon(Icons.add),
+                child: Icon(_isMenuOpen ? Icons.close : Icons.add),
               ),
             ),
           ],
         ),
       ),
-      // Removed Scaffold FAB to use custom Positioned in Stack for dual FABs
+    );
+  }
+
+  Widget _buildAddMenu() {
+    if (!_isMenuOpen) return const SizedBox.shrink();
+
+    return Stack(
+      children: [
+        // 1. Visual Blur Layer & Interaction Layer (Dismiss on tap)
+        Positioned.fill(
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                _isMenuOpen = false;
+              });
+            },
+            behavior: HitTestBehavior.translucent, // Catch taps
+            child: ClipRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+                child: Container(color: Colors.black.withOpacity(0.3)),
+              ),
+            ),
+          ),
+        ),
+
+        // 2. Menu Content
+        Positioned(
+          bottom: 90, // Position above the FAB
+          right: 24,
+          child: CustomPaint(
+            painter: BubbleMenuPainter(color: Colors.white),
+            child: Container(
+              width: 180,
+              padding: const EdgeInsets.only(bottom: 10), // Space for tail
+              child: Material(
+                type: MaterialType.transparency,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: 8),
+                    _buildMenuItem(
+                      context,
+                      icon: SvgPicture.asset(
+                        "assets/suitcase.svg",
+                        colorFilter: const ColorFilter.mode(
+                          AppColors.textPrimary,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                      text: 'Add Device',
+                      onTap: () {
+                        setState(() {
+                          _isMenuOpen = false;
+                        });
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const AddDeviceScreen(isNearbySelected: false),
+                          ),
+                        );
+                      },
+                    ),
+                    const Divider(height: 1, indent: 16, endIndent: 16),
+                    _buildMenuItem(
+                      context,
+                      icon: SvgPicture.asset(
+                        "assets/qrscanner.svg",
+                        colorFilter: const ColorFilter.mode(
+                          AppColors.textPrimary,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                      text: 'Scan',
+                      onTap: () {
+                        setState(() {
+                          _isMenuOpen = false;
+                        });
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ScanDeviceScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showHomeOptions(BuildContext context) {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: false,
+        barrierColor: Colors.transparent,
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              // 1. Blur Background
+              ClipRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+                  child: Container(color: Colors.black.withOpacity(0.3)),
+                ),
+              ),
+
+              // 2. Dismiss
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                behavior: HitTestBehavior.translucent,
+                child: Container(color: Colors.transparent),
+              ),
+
+              // 3. Floating Menu
+              Positioned(
+                top: 80, // Approximate header height + offset
+                left: 24,
+                child: ScaleTransition(
+                  scale: animation,
+                  alignment: Alignment.topLeft,
+                  child: Material(
+                    elevation: 8,
+                    borderRadius: BorderRadius.circular(16),
+                    color: Colors.white,
+                    child: Container(
+                      width: 250,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ..._homes.map((home) {
+                            final isSelected = _selectedHome == home;
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      _selectedHome = home;
+                                    });
+                                    Navigator.pop(context);
+                                  },
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 16,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        if (isSelected)
+                                          const Icon(
+                                            Icons.check,
+                                            color: AppColors.primary,
+                                            size: 20,
+                                          )
+                                        else
+                                          const SizedBox(width: 20),
+                                        const SizedBox(width: 12),
+                                        Text(
+                                          home,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 15,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const Divider(
+                                  height: 1,
+                                  indent: 16,
+                                  endIndent: 16,
+                                ),
+                              ],
+                            );
+                          }).toList(),
+
+                          // Home Management
+                          InkWell(
+                            onTap: () {
+                              // Navigate to Home Management
+                              Navigator.pop(context);
+                            },
+                            borderRadius: const BorderRadius.only(
+                              bottomLeft: Radius.circular(16),
+                              bottomRight: Radius.circular(16),
+                            ),
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 16,
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.settings_outlined,
+                                    color: Colors.black87,
+                                    size: 20,
+                                  ),
+                                  SizedBox(width: 12),
+                                  Text(
+                                    'Home Management',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 15,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildMenuItem(
+    BuildContext context, {
+    required Widget icon,
+    required String text,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: Row(
+          children: [
+            icon,
+            const SizedBox(width: 16),
+            Text(
+              text,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -414,4 +689,54 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+}
+
+class BubbleMenuPainter extends CustomPainter {
+  final Color color;
+  BubbleMenuPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    const double cornerRadius = 24.0;
+    const double tailHeight = 12.0;
+
+    final path = Path();
+    final double contentHeight = size.height - tailHeight;
+
+    // Main body
+    path.addRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(0, 0, size.width, contentHeight),
+        const Radius.circular(cornerRadius),
+      ),
+    );
+
+    // Tail Geometry
+    // FAB is 56px wide, aligned with right edge. Center is 28px from right.
+    final double tailTipX = size.width - 28.0;
+    final double tailBaseWidthHalf = 10.0;
+
+    path.moveTo(tailTipX - tailBaseWidthHalf, contentHeight);
+
+    // Draw smooth tail
+    path.lineTo(tailTipX - 2, size.height - 2); // Left side
+    path.quadraticBezierTo(
+      tailTipX,
+      size.height, // Control tip
+      tailTipX + 2,
+      size.height - 2, // Right side
+    );
+    path.lineTo(tailTipX + tailBaseWidthHalf, contentHeight);
+
+    path.close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

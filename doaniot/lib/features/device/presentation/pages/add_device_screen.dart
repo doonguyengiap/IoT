@@ -5,7 +5,8 @@ import 'package:doaniot/features/device/presentation/pages/connect_device_screen
 import 'package:doaniot/features/device/presentation/pages/scan_device_screen.dart';
 
 class AddDeviceScreen extends StatefulWidget {
-  const AddDeviceScreen({super.key});
+  final bool isNearbySelected;
+  const AddDeviceScreen({super.key, this.isNearbySelected = true});
 
   @override
   State<AddDeviceScreen> createState() => _AddDeviceScreenState();
@@ -15,7 +16,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   List<DeviceItem> _foundDevices = [];
-  bool _isNearbySelected = true;
+  late bool _isNearbySelected;
   String _selectedCategory = 'Popular';
   final List<String> _categories = [
     'Popular',
@@ -40,6 +41,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen>
   @override
   void initState() {
     super.initState();
+    _isNearbySelected = widget.isNearbySelected;
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 4),
@@ -308,39 +310,38 @@ class _AddDeviceScreenState extends State<AddDeviceScreen>
             ],
           ),
         ),
-        if (_foundDevices.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              children: [
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size(double.infinity, 56),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    elevation: 0,
+        Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            children: [
+              ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 56),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
                   ),
-                  child: const Text(
-                    'Connect to All Devices',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
+                  elevation: 0,
                 ),
-                const SizedBox(height: 16),
-                TextButton(
-                  onPressed: () {},
-                  child: const Text(
-                    "Can't find your devices? \nLearn more",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: AppColors.textSecondary),
-                  ),
+                child: const Text(
+                  'Connect to All Devices',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: () {},
+                child: const Text(
+                  "Can't find your devices? \nLearn more",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: AppColors.textSecondary),
+                ),
+              ),
+            ],
           ),
+        ),
         const SizedBox(height: 24),
       ],
     );

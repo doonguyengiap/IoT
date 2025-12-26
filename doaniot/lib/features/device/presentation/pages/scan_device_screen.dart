@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:doaniot/features/device/presentation/pages/enter_setup_code_screen.dart';
 import 'package:doaniot/features/device/presentation/pages/add_device_screen.dart'; // For DeviceItem
@@ -172,9 +173,13 @@ class _ScanDeviceScreenState extends State<ScanDeviceScreen>
                           color: Colors.white.withOpacity(0.2),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
-                          Icons.folder_open,
-                          color: Colors.white,
+                        child: IconButton(
+                          onPressed: () {},
+                          icon: Icon(
+                            Icons.folder_rounded,
+                            color: Colors.white,
+                            size: 30,
+                          ),
                         ),
                       ),
 
@@ -202,7 +207,10 @@ class _ScanDeviceScreenState extends State<ScanDeviceScreen>
                           color: Colors.white.withOpacity(0.2),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.image, color: Colors.white),
+                        child: SvgPicture.asset(
+                          "assets/picture.svg",
+                          color: Colors.white,
+                        ),
                       ),
                     ],
                   ),
