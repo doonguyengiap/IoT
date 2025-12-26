@@ -28,71 +28,71 @@ class _AddDeviceScreenState extends State<AddDeviceScreen>
   }
 
   void _startScanning() async {
-    await Future.delayed(const Duration(seconds: 2));
+    // 1. Smart Light (Top Left - 11h)
+    await Future.delayed(const Duration(milliseconds: 1000));
     if (mounted) {
       setState(() {
         _foundDevices.add(
           DeviceItem(
             img: Image.asset("assets/den.png"),
             name: "Smart Light",
-            top: 0.15,
-            left: 0.15,
+            alignment: const Alignment(-0.6, -0.7),
           ),
         );
       });
     }
 
-    await Future.delayed(const Duration(seconds: 2));
+    // 2. Camera (Top Right - 2h)
+    await Future.delayed(const Duration(milliseconds: 2000));
     if (mounted) {
       setState(() {
         _foundDevices.add(
           DeviceItem(
             img: Image.asset("assets/cam.png"),
             name: "Smart Camera",
-            top: 0.15,
-            right: 0.15,
+            alignment: const Alignment(0.6, -0.7),
           ),
         );
       });
     }
 
-    await Future.delayed(const Duration(seconds: 2));
+    // 3. Wi-Fi Router (Bottom Right - 4h)
+    await Future.delayed(const Duration(milliseconds: 1500));
     if (mounted) {
       setState(() {
         _foundDevices.add(
           DeviceItem(
             img: Image.asset("assets/wifi.png"),
             name: "Wi-Fi Router",
-            top: 0.4,
-            right: 0.05,
+            alignment: const Alignment(0.8, 0.4),
           ),
         );
       });
     }
 
-    await Future.delayed(const Duration(seconds: 1));
+    // 4. AC (Bottom - 6h)
+    await Future.delayed(const Duration(milliseconds: 3000));
     if (mounted) {
       setState(() {
         _foundDevices.add(
           DeviceItem(
             img: Image.asset("assets/dhoa.png"),
             name: "Air Conditioner",
-            bottom: 0.15,
-            right: 0.15,
+            alignment: const Alignment(0, 0.9),
           ),
         );
       });
     }
 
-    await Future.delayed(const Duration(seconds: 1));
+    // 5. Speaker (Bottom Left - 8h)
+    await Future.delayed(const Duration(milliseconds: 2500));
     if (mounted) {
       setState(() {
         _foundDevices.add(
           DeviceItem(
             img: Image.asset("assets/loa.png"),
-            name: "Air Conditioner",
-            bottom: 0.15,
-            left: 0.15,
+            name: "Speaker",
+            alignment: const Alignment(-0.8, 0.4),
           ),
         );
       });
@@ -260,23 +260,19 @@ class _AddDeviceScreenState extends State<AddDeviceScreen>
                   ),
                 ),
 
-                // Found Devices
-                ..._foundDevices.map(
-                  (device) => Positioned(
-                    top: device.top != null
-                        ? MediaQuery.of(context).size.width * device.top! + 50
-                        : null,
-                    bottom: device.bottom != null
-                        ? MediaQuery.of(context).size.width * device.bottom! +
-                              50
-                        : null,
-                    left: device.left != null
-                        ? MediaQuery.of(context).size.width * device.left!
-                        : null,
-                    right: device.right != null
-                        ? MediaQuery.of(context).size.width * device.right!
-                        : null,
-                    child: _buildDeviceItem(device),
+                // Found Devices Container
+                SizedBox(
+                  width: 320,
+                  height: 320,
+                  child: Stack(
+                    children: _foundDevices
+                        .map(
+                          (device) => Align(
+                            alignment: device.alignment,
+                            child: _buildDeviceItem(device),
+                          ),
+                        )
+                        .toList(),
                   ),
                 ),
               ],
@@ -367,8 +363,10 @@ class _AddDeviceScreenState extends State<AddDeviceScreen>
   }
 
   Widget _buildDeviceItem(DeviceItem device) {
-    return Column(
-      children: [Container(width: 60, height: 60, child: device.img)],
+    return SizedBox(
+      width: 60,
+      height: 60,
+      child: device.img, // Xóa bỏ Column ở đây
     );
   }
 }
@@ -376,21 +374,9 @@ class _AddDeviceScreenState extends State<AddDeviceScreen>
 class DeviceItem {
   final Image img;
   final String name;
-  final double? top;
-  final double? left;
-  final double? right;
-  final double? bottom;
-
-class DeviceItem {
-  final Image img;
-  final String name;
   final Alignment alignment;
 
-  DeviceItem({
-    required this.img,
-    required this.name,
-    required this.alignment,
-  });
+  DeviceItem({required this.img, required this.name, required this.alignment});
 }
 
 class RipplePainter extends CustomPainter {
