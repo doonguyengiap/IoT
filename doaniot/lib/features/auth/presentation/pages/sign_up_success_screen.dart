@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:doaniot/core/theme/app_colors.dart';
+import 'package:doaniot/features/home/presentation/pages/main_screen.dart';
 
 class SignUpSuccessScreen extends StatelessWidget {
   const SignUpSuccessScreen({super.key});
@@ -99,9 +100,11 @@ class SignUpSuccessScreen extends StatelessWidget {
                 onPressed: () {
                   // Navigate to Dashboard or Home
                   // Navigator.pushAndRemoveUntil...
-                  ScaffoldMessenger.of(
+                  Navigator.pushAndRemoveUntil(
                     context,
-                  ).showSnackBar(const SnackBar(content: Text("To Dashboard")));
+                    MaterialPageRoute(builder: (context) => const MainScreen()),
+                    (route) => false,
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
