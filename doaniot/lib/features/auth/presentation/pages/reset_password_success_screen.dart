@@ -8,7 +8,6 @@ class ResetPasswordSuccessScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -16,18 +15,27 @@ class ResetPasswordSuccessScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Spacer(),
-              // Success Icon (Using a placeholder Icon for now or local asset if available)
               Container(
                 width: 120,
                 height: 120,
+                alignment: Alignment.bottomCenter,
+                clipBehavior: Clip.hardEdge,
                 decoration: const BoxDecoration(
                   color: AppColors.primary,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.check_rounded,
-                  size: 64,
-                  color: Colors.white,
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    top: 20,
+                    left: 20,
+                    right: 20,
+                    bottom: 0,
+                  ),
+                  child: Image.asset(
+                    "assets/1.png",
+                    fit: BoxFit.contain,
+                    alignment: Alignment.bottomCenter,
+                  ),
                 ),
               ),
               const SizedBox(height: 40),
@@ -51,7 +59,7 @@ class ResetPasswordSuccessScreen extends StatelessWidget {
 
               const Spacer(),
 
-              // Go to Homepage Button
+              // trở về màn hình chính
               ElevatedButton(
                 onPressed: () {
                   Navigator.pushAndRemoveUntil(
@@ -59,7 +67,7 @@ class ResetPasswordSuccessScreen extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (context) => const SignUpSuccessScreen(),
                     ),
-                    (route) => false, // Remove back stack
+                    (route) => false,
                   );
                 },
                 style: ElevatedButton.styleFrom(

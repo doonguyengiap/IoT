@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:doaniot/core/theme/app_colors.dart';
 import 'package:doaniot/features/auth/presentation/pages/create_new_password_screen.dart';
-import 'package:doaniot/core/presentation/widgets/loading_dialog.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   final String email;
@@ -14,7 +13,7 @@ class OtpVerificationScreen extends StatefulWidget {
 }
 
 class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
-  // Controllers for 4 digit inputs
+  // controller cho ô nhập otp
   final List<TextEditingController> _controllers = List.generate(
     4,
     (index) => TextEditingController(),
@@ -61,15 +60,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     String otp = _controllers.map((c) => c.text).join();
 
     if (otp.length == 4) {
-      // 1. Hiện loading mô phỏng kết nối server
-      LoadingDialog.show(context, message: 'Verifying code...');
-
-      // 2. Chờ 1.5 giây để mô phỏng độ trễ mạng
-      await Future.delayed(const Duration(milliseconds: 1500));
-
-      if (mounted) LoadingDialog.hide(context);
-
-      // 3. Logic kiểm tra mã (Mô phỏng mã đúng là 1111)
+      // kiểm tra otp
       if (otp == "1111") {
         if (mounted) {
           Navigator.pushReplacement(
@@ -80,12 +71,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
           );
         }
       } else {
-        // 4. Nếu sai, xóa trắng các ô và báo lỗi
+        // option - nếu sai, xóa trắng các ô và báo lỗi
         if (mounted) {
           for (var controller in _controllers) {
             controller.clear();
           }
-          _focusNodes[0].requestFocus(); // Quay lại ô đầu tiên
+          _focusNodes[0].requestFocus();
 
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -102,20 +93,22 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
   void _onChanged(String value, int index) {
     if (value.isNotEmpty) {
-      // Move to next field
+      // di chuyển đến ô tiếp theo
       if (index < 3) {
         _focusNodes[index + 1].requestFocus();
       } else {
-        // Last field, unfocus
+        // cuối cùng, unfocus
+        // thực hiện kiểm tra otp
         _focusNodes[index].unfocus();
+        _handleVerify();
       }
     } else {
-      // Move to previous field if backspace
+      // di chuyển đến ô trước
       if (index > 0) {
         _focusNodes[index - 1].requestFocus();
       }
     }
-    setState(() {}); // Rebuild to check if button should be enabled
+    setState(() {});
   }
 
   @override
@@ -160,7 +153,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               ),
               const SizedBox(height: 40),
 
-              // 4-Digit Input Row
+              // 4-digit row
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: List.generate(4, (index) {
@@ -206,7 +199,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
               const SizedBox(height: 32),
 
-              // Resend Timer
+              // resend timer
               Center(
                 child: RichText(
                   text: TextSpan(
@@ -249,10 +242,24 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
               const Spacer(),
 
-              // Verify Button (Optional, but good to have)
-              // Since the flow continues automatically or via button, let's keep it consistent
-
-              // Keypad (Implicitly provided by OS)
+              // verify button
+              ElevatedButton(
+                onPressed: _handleVerify,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 52),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(32),
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text(
+                  'Verify',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+              ),
+              const SizedBox(height: 24),
             ],
           ),
         ),

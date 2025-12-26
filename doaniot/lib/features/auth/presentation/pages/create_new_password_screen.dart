@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:doaniot/core/theme/app_colors.dart';
-import 'package:doaniot/core/presentation/widgets/loading_dialog.dart';
 import 'package:doaniot/features/auth/presentation/pages/reset_password_success_screen.dart';
 
 class CreateNewPasswordScreen extends StatefulWidget {
@@ -28,12 +27,7 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
 
   void _handleSavePassword() async {
     if (_formKey.currentState!.validate()) {
-      LoadingDialog.show(context, message: 'Updating...');
-
-      await Future.delayed(const Duration(seconds: 2));
-
       if (mounted) {
-        LoadingDialog.hide(context);
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -85,7 +79,7 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
                 ),
                 const SizedBox(height: 32),
 
-                // New Password
+                // pass mới
                 Text(
                   'New Password',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -144,7 +138,7 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                // Confirm Password
+                // xác nhận lại pass
                 Text(
                   'Confirm New Password',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -204,7 +198,7 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
 
                 const Spacer(),
 
-                // Save Button
+                // save button
                 ElevatedButton(
                   onPressed: _handleSavePassword,
                   style: ElevatedButton.styleFrom(
