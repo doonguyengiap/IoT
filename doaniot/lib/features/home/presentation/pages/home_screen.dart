@@ -5,6 +5,7 @@ import 'package:doaniot/features/device/presentation/pages/add_device_screen.dar
 import 'package:doaniot/features/device/presentation/pages/scan_device_screen.dart';
 import 'package:doaniot/features/chat/presentation/pages/chat_ai_screen.dart';
 import 'package:doaniot/features/notification/presentation/pages/notification_screen.dart';
+import 'package:doaniot/features/home/presentation/pages/voice_command_screen.dart';
 import 'dart:ui';
 
 class HomeScreen extends StatefulWidget {
@@ -344,7 +345,14 @@ class _HomeScreenState extends State<HomeScreen> {
               right: 90,
               child: FloatingActionButton(
                 heroTag: "mic_fab",
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const VoiceCommandScreen(),
+                    ),
+                  );
+                },
                 backgroundColor: AppColors.secondary,
                 shape: const CircleBorder(),
                 elevation: 0,
