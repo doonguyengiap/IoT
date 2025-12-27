@@ -35,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   bool _isMenuOpen = false;
+  final List<DeviceItem> _devices = [];
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Stack(
+          fit: StackFit.expand,
           children: [
             SingleChildScrollView(
               child: Padding(
@@ -276,64 +278,173 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 48),
 
                     // Empty State
-                    Center(
-                      child: Column(
-                        children: [
-                          Container(
-                            width: 200,
-                            height: 200,
-                            child: Image.asset("assets/task.png"),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'No Devices',
-                            style: Theme.of(context).textTheme.titleLarge
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimary,
-                                ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            "You haven't added a device yet.",
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(color: AppColors.textSecondary),
-                          ),
-                          const SizedBox(height: 24),
-                          // Resized Add Device Button
-                          SizedBox(
-                            height: 48,
-                            child: ElevatedButton.icon(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const AddDeviceScreen(),
+                    if (_devices.isEmpty)
+                      Center(
+                        child: Column(
+                          children: [
+                            Container(
+                              width: 200,
+                              height: 200,
+                              child: Image.asset("assets/task.png"),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No Devices',
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.textPrimary,
                                   ),
-                                );
-                              },
-                              icon: const Icon(Icons.add),
-                              label: const Text('Add Device'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 32,
-                                  vertical: 12,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              "You haven't added a device yet.",
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(color: AppColors.textSecondary),
+                            ),
+                            const SizedBox(height: 24),
+                            // Resized Add Device Button
+                            SizedBox(
+                              height: 48,
+                              child: ElevatedButton.icon(
+                                onPressed: () async {
+                                  final result = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const AddDeviceScreen(),
+                                    ),
+                                  );
+                                  if (result != null && result is DeviceItem) {
+                                    setState(() {
+                                      _devices.add(result);
+                                    });
+                                  }
+                                },
+                                icon: const Icon(Icons.add),
+                                label: const Text('Add Device'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primary,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 32,
+                                    vertical: 12,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30),
+                                  ),
+                                  elevation: 0,
                                 ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
-                                elevation: 0,
                               ),
                             ),
-                          ),
-                          // Add enough space for FABs at the bottom
-                          const SizedBox(height: 80),
-                        ],
+                            // Add enough space for FABs at the bottom
+                            const SizedBox(height: 80),
+                          ],
+                        ),
+                      )
+                    else
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 16,
+                              mainAxisSpacing: 16,
+                              childAspectRatio: 0.85,
+                            ),
+                        itemCount: _devices.length,
+                        itemBuilder: (context, index) {
+                          final device = _devices[index];
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(
+                                      height: 48,
+                                      width: 48,
+                                      child: device.img,
+                                    ),
+                                    SizedBox(
+                                      height: 24,
+                                      child: Switch(
+                                        value: device.isOn,
+                                        onChanged: (val) {
+                                          setState(() {
+                                            device.isOn = val;
+                                          });
+                                        },
+                                        activeColor: AppColors.primary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  device.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.lightGrey,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.wifi,
+                                        size: 12,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        "Wi-Fi",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: AppColors.textSecondary,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
                       ),
-                    ),
+                    // Add enough space for FABs at the bottom if grid is shown
+                    if (_devices.isNotEmpty) const SizedBox(height: 80),
                   ],
                 ),
               ),
@@ -437,17 +548,22 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       text: 'Add Device',
-                      onTap: () {
+                      onTap: () async {
                         setState(() {
                           _isMenuOpen = false;
                         });
-                        Navigator.push(
+                        final result = await Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
                                 const AddDeviceScreen(isNearbySelected: false),
                           ),
                         );
+                        if (result != null && result is DeviceItem) {
+                          setState(() {
+                            _devices.add(result);
+                          });
+                        }
                       },
                     ),
                     const Divider(height: 1, indent: 16, endIndent: 16),

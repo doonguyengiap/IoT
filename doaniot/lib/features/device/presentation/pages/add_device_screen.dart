@@ -419,8 +419,8 @@ class _AddDeviceScreenState extends State<AddDeviceScreen>
             itemBuilder: (context, index) {
               final device = filteredDevices[index];
               return GestureDetector(
-                onTap: () {
-                  Navigator.push(
+                onTap: () async {
+                  final result = await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => ConnectDeviceScreen(
@@ -432,6 +432,9 @@ class _AddDeviceScreenState extends State<AddDeviceScreen>
                       ),
                     ),
                   );
+                  if (result != null && context.mounted) {
+                    Navigator.pop(context, result);
+                  }
                 },
                 child: Column(
                   children: [
@@ -509,13 +512,16 @@ class _AddDeviceScreenState extends State<AddDeviceScreen>
 
   Widget _buildDeviceItem(DeviceItem device) {
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
+      onTap: () async {
+        final result = await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => ConnectDeviceScreen(device: device),
           ),
         );
+        if (result != null && context.mounted) {
+          Navigator.pop(context, result);
+        }
       },
       child: SizedBox(width: 60, height: 60, child: device.img),
     );
@@ -526,8 +532,14 @@ class DeviceItem {
   final Image img;
   final String name;
   final Alignment alignment;
+  bool isOn;
 
-  DeviceItem({required this.img, required this.name, required this.alignment});
+  DeviceItem({
+    required this.img,
+    required this.name,
+    required this.alignment,
+    this.isOn = true,
+  });
 }
 
 class RipplePainter extends CustomPainter {

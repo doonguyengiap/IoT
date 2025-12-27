@@ -227,7 +227,8 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.popUntil(context, (route) => route.isFirst);
+                        // Return the device to the previous screen (AddDeviceScreen)
+                        Navigator.pop(context, widget.device);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.secondary,
@@ -248,8 +249,8 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        // Navigate to device control? For now just pop or stay
-                        Navigator.popUntil(context, (route) => route.isFirst);
+                        // Return the device to the previous screen
+                        Navigator.pop(context, widget.device);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,

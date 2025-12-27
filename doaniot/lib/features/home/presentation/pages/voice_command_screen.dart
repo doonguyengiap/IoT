@@ -334,88 +334,106 @@ class SiriWavePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final double centerY = size.height / 2;
-    // Base amplitude
-    // soundLevel is usually 0..approx 10 depending on mic.
-    // We want a subtle idle wave when soundLevel is low.
+    // Normalize sound level.
     final double normalizedSound = math.max(0, soundLevel);
+    // Base amplitude plus dynamic reaction
+    final double amplitude = 30 + (normalizedSound * 15);
 
-    // Dynamic amplitude based on sound
-    // If silent, small amplitude. If loud, large.
-    final double amplitude = 10 + (normalizedSound * 8);
+    // Draw layers from back to front
+    // 1. Purple & Orange (Background)
+    _drawSymmetricWave(
+      canvas: canvas,
+      size: size,
+      centerY: centerY,
+      waveHeight: amplitude * 0.6,
+      frequency: 1.8,
+      phaseShift: animationValue + 2.0,
+      color: const Color(0xFFAC5DD9).withOpacity(0.5), // Purple
+    );
+    _drawSymmetricWave(
+      canvas: canvas,
+      size: size,
+      centerY: centerY,
+      waveHeight: amplitude * 0.5,
+      frequency: 2.1,
+      phaseShift: animationValue + 4.0,
+      color: const Color(0xFFFF9F47).withOpacity(0.6), // Orange
+    );
 
-    // Draw multiple overlapping waves
-    // Cyan
-    _drawWave(
-      canvas,
-      size,
-      centerY,
-      amplitude,
-      1.0,
-      animationValue,
-      const Color(0xFF64D2FF),
+    // 2. Green
+    _drawSymmetricWave(
+      canvas: canvas,
+      size: size,
+      centerY: centerY,
+      waveHeight: amplitude * 0.8,
+      frequency: 1.4,
+      phaseShift: animationValue + 1.2,
+      color: const Color(0xFF8CD867).withOpacity(0.7), // Green
     );
-    // Pink
-    _drawWave(
-      canvas,
-      size,
-      centerY,
-      amplitude * 0.8,
-      0.8,
-      animationValue + 0.3,
-      const Color(0xFFFF375F),
-    );
-    // Green
-    _drawWave(
-      canvas,
-      size,
-      centerY,
-      amplitude * 1.2,
-      1.2,
-      animationValue + 0.7,
-      const Color(0xFF30D158),
+
+    // 3. Blue (Front/Center)
+    _drawSymmetricWave(
+      canvas: canvas,
+      size: size,
+      centerY: centerY,
+      waveHeight: amplitude,
+      frequency: 1.0,
+      phaseShift: animationValue,
+      color: const Color(0xFF445EF2).withOpacity(0.9), // Blue
     );
   }
 
-  void _drawWave(
-    Canvas canvas,
-    Size size,
-    double centerY,
-    double waveHeight,
-    double frequency,
-    double phaseShift,
-    Color color,
-  ) {
+  void _drawSymmetricWave({
+    required Canvas canvas,
+    required Size size,
+    required double centerY,
+    required double waveHeight,
+    required double frequency,
+    required double phaseShift,
+    required Color color,
+  }) {
     final paint = Paint()
-      ..color = color.withOpacity(0.6)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3.0
-      ..strokeCap = StrokeCap.round
-      // Add blend mode for glowing effect overlap
-      ..blendMode = BlendMode.lighten;
+      ..color = color
+      ..style = PaintingStyle.fill; // Changed to fill
 
     final path = Path();
     final double width = size.width;
 
-    // We draw a sine wave
-    // Frequency also modulates slightly with sound level to make it "jitter"
-    final double effectiveFreq = frequency + (soundLevel * 0.05);
+    // Effective frequency jitters slightly with sound
+    final double effectiveFreq = frequency + (soundLevel * 0.1);
 
     path.moveTo(0, centerY);
 
-    for (double x = 0; x <= width; x++) {
-      // Normalized X from -1 to 1 for envelope calculation
-      final double nx = (x / width) * 2 - 1;
-      // Envelope: attenuation at edges
+    // Top half
+    for (double x = 0; x <= width; x += 1) {
+      // Step optimization
+      final double nx = (x / width) * 2 - 1; // -1 to 1
+      // Envelope: Bell curve to taper edges to 0
       final double envelope = math.pow(1 - (nx * nx), 2).toDouble();
 
       final double angle =
           (x / width) * 2 * math.pi * effectiveFreq +
           (phaseShift * 2 * math.pi);
 
-      final double y = centerY + math.sin(angle) * waveHeight * envelope;
-      path.lineTo(x, y);
+      // Calculate offset from center
+      final double offset = math.sin(angle) * waveHeight * envelope;
+
+      path.lineTo(x, centerY - offset.abs()); // Go UP
     }
 
+    // Bottom half (Mirror)
+    for (double x = width; x >= 0; x -= 1) {
+      final double nx = (x / width) * 2 - 1;
+      final double envelope = math.pow(1 - (nx * nx), 2).toDouble();
+      final double angle =
+          (x / width) * 2 * math.pi * effectiveFreq +
+          (phaseShift * 2 * math.pi);
+      final double offset = math.sin(angle) * waveHeight * envelope;
+
+      path.lineTo(x, centerY + offset.abs()); // Go DOWN
+    }
+
+    path.close();
     canvas.drawPath(path, paint);
   }
 
